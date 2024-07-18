@@ -13,7 +13,7 @@ product_send_times = {}
 special_products = ["بيربل مست", "هايلاند بيريز", "سبايسي زيست"]
 
 # List of products to exclude from sending
-excluded_products = ["", "", ""]
+excluded_products = ["ايسي رش", "سي سايد فروست", "هايلاند بيريز","سمرة"]
 
 # Variable to store the time of the last clearing of the sent_products list
 last_clear_time = time.time()
@@ -112,7 +112,7 @@ def send_product_data_to_telegram():
                             print(f"Failed to send product data for {product_name}. Status code: {response.status_code}")
                 else:
                     if product_name not in sent_products:
-                        message_text = f"✅ **المنتج متاح** ✅: {product_name}"
+                        message_text = f"✅ ** المنتج متاح ** ✅: {product_name}"
                         reply_markup = {
                         "inline_keyboard": [
                            [{"text": "🔍 عرض المنتج", "url": product_link}, {"text": "🛒 عرض السلة", "url": "https://www.dzrt.com/ar/checkout/cart"}],
