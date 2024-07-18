@@ -89,8 +89,9 @@ def send_product_data_to_telegram():
                 current_time = time.time()
                 if product_name in special_products:
                     if (product_name not in sent_products) or (current_time - product_send_times.get(product_name, 0) >= (3 * 600)):
+                        
                         message_text = f"✅ **المنتج متاح** ✅: {product_name}"
-        reply_markup = {
+                        reply_markup = {
             "inline_keyboard": [
                 [{"text": "🔍 عرض المنتج", "url": product_link}, {"text": "🛒 عرض السلة", "url": "https://www.dzrt.com/ar/checkout/cart"}],
                 [{"text": "🔐 تسجيل الدخول", "url": "https://www.dzrt.com/ar/customer/account/login/"}, {"text": "💳 الانتقال إلى رابط الدفع النهائي", "url": "https://www.dzrt.com/ar/onestepcheckout.html"}]
