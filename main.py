@@ -3,14 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-# Global list to store product names that are successfully sent
+# Global list to store product names that are successfully q sent
 sent_products = []
 
 # Dictionary to store the time each product was last sent
 product_send_times = {}
 
 # List of products that have special handling
-special_products = ["بيربل مست", "هايلاند بيريز", "سبايسي زيست", "إيدجي منت", "منت فيوجن", "ايسي راش", "جاردن منت", "سي سايد فروست", "تمرة", "سمرة", "هيلة"]
+special_products = ["بيربل مست", "هايلاند بيريز", "سبايسي زيست"]
 
 # List of products to exclude from sending
 excluded_products = ["", "", ""]
@@ -66,66 +66,74 @@ def send_product_data_to_telegram():
     if html_content:
         soup = BeautifulSoup(html_content, "html.parser")
         product_links = [a["href"] for a in soup.find_all("a", class_="product-item-link")]
-        bot_token = "6758564840:AAG1L-yn-5-FSru-jZW_oN261YGi-EEqTcs"
-        chat_id = "-1002045422486"
-        telegram_api_url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
-        
+        product_data_list = []
         for product_link in product_links:
+            product_info = {"url": product_link}
             product_name, product_status, image_url = extract_product_details(product_link)
             if product_name and product_status:
+                product_info.update({"name": product_name, "status": product_status, "image_url": image_url})
+                product_data_list.append(product_info)
                 print(f"Product Name: {product_name}")
                 print(f"Product Status: {product_status}")
                 print(f"Image URL: {image_url}")
                 print("-" * 50)
-
-                if product_status == "سيتم توفيرها في المخزون قريباً" and product_name not in excluded_products:
-                    current_time = time.time()
-                    if product_name in special_products:
-                        if (product_name not in sent_products) or (current_time - product_send_times.get(product_name, 0) >= (3 * 600)):
-                            message_text = f"المنتج متوفر: {product_name} ✅"
-                            reply_markup = {
-                                "inline_keyboard": [
-                                    [{"text": "رابط السلة 🛒", "url": "https://www.dzrt.com/ar/checkout/cart"}, {"text": "رابط إعادة الطلب 🔄", "url": "https://www.dzrt.com/ar/onestepcheckout.html"}],
-                                    [{"text": "رابط المنتج 🔗", "url": product_link}]
-                                ]
-                            }
-                            params = {
-                                "chat_id": chat_id,
-                                "photo": image_url,
-                                "caption": message_text,
-                                "reply_markup": json.dumps(reply_markup),
-                                "parse_mode": "HTML"
-                            }
-                            response = requests.post(telegram_api_url, params=params)
-                            if response.status_code == 200:
-                                print(f"Product data sent successfully for {product_name}")
-                                sent_products.append(product_name)
-                                product_send_times[product_name] = current_time
-                            else:
-                                print(f"Failed to send product data for {product_name}. Status code: {response.status_code}")
-                    else:
-                        if product_name not in sent_products:
-                            message_text = f"المنتج متوفر: {product_name} ✅"
-                            reply_markup = {
-                                "inline_keyboard": [
-                                    [{"text": "رابط السلة 🛒", "url": "https://www.dzrt.com/ar/checkout/cart"}, {"text": "رابط إعادة الطلب 🔄", "url": "https://www.dzrt.com/ar/onestepcheckout.html"}],
-                                    [{"text": "رابط المنتج 🔗", "url": product_link}]
-                                ]
-                            }
-                            params = {
-                                "chat_id": chat_id,
-                                "photo": image_url,
-                                "caption": message_text,
-                                "reply_markup": json.dumps(reply_markup),
-                                "parse_mode": "HTML"
-                            }
-                            response = requests.post(telegram_api_url, params=params)
-                            if response.status_code == 200:
-                                print(f"Product data sent successfully for {product_name}")
-                                sent_products.append(product_name)
-                            else:
-                                print(f"Failed to send product data for {product_name}. Status code: {response.status_code}")
-        
+        bot_token = "6758564840:AAG1L-yn-5-FSru-jZW_oN261YGi-EEqTcs"
+        chat_id = "-1002168098044"
+        telegram_api_url = f"https://api.telegram.org/bot{bot_token}/sendPhoto"
+        for product_data in product_data_list:
+            product_name = product_data.get("name", "")
+            product_status = product_data.get("status", "")
+            product_url = product_data.get("url", "")
+            image_url = product_data.get("image_url", "")
+            if product_status == "سيتم توفيرها في المخزون قريباً" and product_name not in excluded_products:
+                current_time = time.time()
+                if product_name in special_products:
+                    if (product_name not in sent_products) or (current_time - product_send_times.get(product_name, 0) >= (3 * 600)):
+                        message_text = f"اسم المنتج: {product_name}\nحالة المنتج: {product_status}"
+                        reply_markup = {
+                            "inline_keyboard": [
+                                [{"text": "عرض المنتج", "url": product_url}],
+                                [{"text": "عرض السلة", "url": "https://www.dzrt.com/ar/checkout/cart"}],
+                                [{"text": "تسجيل الدخول", "url": "https://www.dzrt.com/ar/customer/account/login/"}],
+                                [{"text": "الانتقال إلى رابط الدفع النهائي", "url": "https://www.dzrt.com/ar/onestepcheckout.html"}]
+                            ]
+                        }
+                        params = {
+                            "chat_id": chat_id,
+                            "photo": image_url,
+                            "caption": message_text,
+                            "reply_markup": json.dumps(reply_markup)
+                        }
+                        response = requests.post(telegram_api_url, params=params)
+                        if response.status_code == 200:
+                            print(f"Product data sent successfully for {product_name}")
+                            sent_products.append(product_name)
+                            product_send_times[product_name] = current_time
+                        else:
+                            print(f"Failed to send product data for {product_name}. Status code: {response.status_code}")
+                else:
+                    if product_name not in sent_products:
+                        message_text = f"اسم المنتج: {product_name}\nحالة المنتج: {product_status}"
+                        reply_markup = {
+                            "inline_keyboard": [
+                                [{"text": "عرض المنتج", "url": product_url}],
+                                [{"text": "عرض السلة", "url": "https://www.dzrt.com/ar/checkout/cart"}],
+                                [{"text": "تسجيل الدخول", "url": "https://www.dzrt.com/ar/customer/account/login/"}],
+                                [{"text": "الانتقال إلى رابط الدفع النهائي", "url": "https://www.dzrt.com/ar/onestepcheckout.html"}]
+                            ]
+                        }
+                        params = {
+                            "chat_id": chat_id,
+                            "photo": image_url,
+                            "caption": message_text,
+                            "reply_markup": json.dumps(reply_markup)
+                        }
+                        response = requests.post(telegram_api_url, params=params)
+                        if response.status_code == 200:
+                            print(f"Product data sent successfully for {product_name}")
+                            sent_products.append(product_name)
+                        else:
+                            print(f"Failed to send product data for {product_name}. Status code: {response.status_code}")
         if time.time() - last_clear_time >= 60:
             sent_products = [product for product in sent_products if product in special_products]
             last_clear_time = time.time()
@@ -133,4 +141,4 @@ def send_product_data_to_telegram():
 # Main loop to run the code every minute
 while True:
     send_product_data_to_telegram()
-    time.sleep(20)
+    #time.sleep(20)
