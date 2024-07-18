@@ -13,7 +13,7 @@ product_send_times = {}
 special_products = ["بيربل مست", "هايلاند بيريز", "سبايسي زيست"]
 
 # List of products to exclude from sending
-excluded_products = ["ايسي رش", "سي سايد فروست", "هايلاند بيريز", "سمرة"]
+excluded_products = ["ايسي رش", "سي سايد فروست", "سمرة"]
 
 # Variable to store the time of the last clearing of the sent_products list
 last_clear_time = time.time()
